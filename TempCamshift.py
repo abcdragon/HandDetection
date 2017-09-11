@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-cap = cv2.VideoCapture('slow.flv')
+cap = cv2.VideoCapture('slow.flv') # Change cv2.VideoCapture
 # take first frame of the video
 ret,frame = cap.read()
 # setup initial location of window
