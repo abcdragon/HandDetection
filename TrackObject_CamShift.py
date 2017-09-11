@@ -67,11 +67,8 @@ def camShift():
             ret, trackWindow = cv2.CamShift(dst, trackWindow, termination)
 
             pts = cv2.boxPoints(ret)
-<<<<<<< HEAD
             pts = np.int(pts)
-=======
             pts = np.int0(pts)
->>>>>>> origin/master
             cv2.polylines(frame, [pts], True, (0, 255, 0), 2)
 
         cv2.imshow('frame', frame)
