@@ -12,7 +12,6 @@ def YCbCr_Skin_Rectangle():
     COLOR_MAX = np.array([255, 173, 127], np.uint8)
 
     frame_threshed = cv2.inRange(hsv, COLOR_MIN, COLOR_MAX)
-    gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     ret, threshold_image = cv2.threshold(frame_threshed, 100, 255,  cv2.THRESH_BINARY)
     _, contours, hierarchy = cv2.findContours(threshold_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
