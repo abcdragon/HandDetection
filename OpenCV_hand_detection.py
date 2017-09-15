@@ -3,10 +3,13 @@ import numpy as np
 import math
 import MiddlePoint
 
-img = cv2.imread('C:\\Users\\HelloGuys\\Desktop\\HandDetectionTestImages\\TestImageVertical.jpg', cv2.IMREAD_COLOR)
+img = cv2.imread("TestImageVertical.jpg", cv2.IMREAD_COLOR)
+
 img1 = img.copy()
 
 def YCbCr_Skin_Rectangle():
+    print(img.shape)
+
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2YCrCb)
     COLOR_MIN = np.array([0, 137, 77], np.uint8)
     COLOR_MAX = np.array([255, 173, 127], np.uint8)
@@ -43,29 +46,29 @@ def YCbCr_Skin_Rectangle():
                 tempPoint.append(tempHull)
                 #cv2.circle(img1, tempHull, 10, (255, 0, 0), -1)
 
-        cv2.drawContours(img1, [hull], 0, (0, 255, 0), 3)
+        cv2.drawContours(img, [hull], 0, (0, 255, 0), 3)
 
     middlePoint = MiddlePoint.FindMiddlePoint(tempPoint)
     #print(middlePoint)
 
+    minX, maxX = middlePoint[0][0], middlePoint[0][0]
     for i in range(len(middlePoint)):
-        #print(middlePoint[i])
+        print(middlePoint[i])
         #cv2.putText(img1, str(middlePoint[i]), (middlePoint[i][0] + 20, middlePoint[i][1] + 20), 2, 1.2, (255, 255, 255))
-        cv2.circle(img1, middlePoint[i], 10, (255, 255, 0), -1)
+        cv2.circle(img, middlePoint[i], 10, (255, 255, 0), -1)
+        if minX > middlePoint[i][0] : minX = middlePoint[i][0]
+        if maxX < middlePoint[i][1] : maxX = middlePoint[i][0]
 
-    cv2.imshow('ConvexHull', img1)
+    x1, y1, x2, y2 = cv2.boundingRect(cnt)
+    x1, x2 = minX, maxX
+    cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
+    cv2.imshow('ConvexHull', img)
 
-    x, y, w, h = cv2.boundingRect(cnt)
     area = cv2.contourArea(cnt)
     ellipse = cv2.fitEllipse(cnt)
 
     equivalent_diameter = np.sqrt(4*area/np.pi)
     Temp_radius = int(equivalent_diameter/2)
-
-    cv2.circle(img, (cx, cy), 3, (0, 0, 255), -1)
-    cv2.circle(img, (cx, cy), Temp_radius, (0, 0, 255), 2)
-    cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)
-    cv2.ellipse(img, ellipse, (50, 50, 50), 2)
 
     topmost = tuple(cnt[cnt[:,:,1].argmin()][0])
     cv2.circle(img1, (topmost[0], topmost[1]), 44, (255, 255, 255), -1)

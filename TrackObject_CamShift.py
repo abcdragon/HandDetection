@@ -42,7 +42,7 @@ def camShift():
     global frame, frame2, inputmode, trackWindow, roi_hist, out
 
     try:
-        cap = cv2.VideoCapture(1)
+        cap = cv2.VideoCapture()
         cap.set(3, 480)
         cap.set(4, 320)
     except:

@@ -15,4 +15,3 @@ mask = cv2.inRange(hsv, COLOR_MIN, COLOR_MAX)
 hsv_roi = hsv[y:y+h, x:x+w]
 mask_roi = mask[y:y+h, x:x+w]
 
-hist = cv2.calcHist([hsv_roi], [0], mask_roi, [16], [0, 180])
