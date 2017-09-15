@@ -38,6 +38,7 @@ def YCbCr_Skin_Rectangle():
 
     tempPoint = []
 
+    #### Hand Dectantion Rectangle
     if not chk:
         hull = cv2.convexHull(cnt)
         for i in range(len(hull)):
@@ -63,6 +64,7 @@ def YCbCr_Skin_Rectangle():
     x1, x2 = minX, maxX
     cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
     cv2.imshow('ConvexHull', img)
+    #### Hand Dectantion Rectangle End
 
     area = cv2.contourArea(cnt)
     ellipse = cv2.fitEllipse(cnt)
