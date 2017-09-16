@@ -65,13 +65,14 @@ def YCbCr_Skin_Rectangle():
     x1, x2 = minX, maxX
     cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
     cv2.imshow('ConvexHull', img)
+
+
+
     #### Hand Dectantion Rectangle End
 
     area = cv2.contourArea(cnt)
-    ellipse = cv2.fitEllipse(cnt)
 
     equivalent_diameter = np.sqrt(4*area/np.pi)
-    Temp_radius = int(equivalent_diameter/2)
 
     topmost = tuple(cnt[cnt[:,:,1].argmin()][0])
     cv2.circle(img1, (topmost[0], topmost[1]), 44, (255, 255, 255), -1)
