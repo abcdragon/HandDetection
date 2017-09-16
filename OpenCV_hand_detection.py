@@ -10,6 +10,8 @@ img1 = img.copy()
 def YCbCr_Skin_Rectangle():
     print(img.shape)
 
+    #### Hand Dectantion Rectangle
+
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2YCrCb)
     COLOR_MIN = np.array([0, 137, 77], np.uint8)
     COLOR_MAX = np.array([255, 173, 127], np.uint8)
@@ -38,7 +40,6 @@ def YCbCr_Skin_Rectangle():
 
     tempPoint = []
 
-    #### Hand Dectantion Rectangle
     if not chk:
         hull = cv2.convexHull(cnt)
         for i in range(len(hull)):
