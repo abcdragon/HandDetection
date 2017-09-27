@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import math
-import MiddlePoint
+import GetMiddlePoint
 
 img = cv2.imread("TestImageVertical.jpg", cv2.IMREAD_COLOR)
 
@@ -11,6 +11,8 @@ def YCbCr_Skin_Rectangle():
     print(img.shape)
 
     #### Hand Dectantion Rectangle
+
+    #
 
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2YCrCb)
     COLOR_MIN = np.array([0, 137, 77], np.uint8)
@@ -50,7 +52,7 @@ def YCbCr_Skin_Rectangle():
 
         cv2.drawContours(img, [hull], 0, (0, 255, 0), 3)
 
-    middlePoint = MiddlePoint.FindMiddlePoint(tempPoint)
+    middlePoint = GetMiddlePoint.FindMiddlePoint(tempPoint)
     #print(middlePoint)
 
     minX, maxX = middlePoint[0][0], middlePoint[0][0]
