@@ -10,28 +10,36 @@ font = cv2.FONT_HERSHEY_SIMPLEX
 
 def main():
     # Capture from webcam
-    cam = cv2.VideoCapture(0) # 카메라에서 읽어오기
+    cam = cv2.VideoCapture('KakaoTalk_Video_20170911_2350_33_902.mp4') # 카메라에서 읽어오기
     fgbg = cv2.createBackgroundSubtractorMOG2() # 영상 속 배경 추출, http://eehoeskrap.tistory.com/117 - 참고 주소
 
     while True:
-
         ret, frame = cam.read()
 
         if ret is False:
             return
 
         # Show ROI rectangle
-        cv2.rectangle(frame, (20, 20), (300, 300), (255, 255, 2), 4)  # outer most rectangle
-        ROI = frame[20:300, 20:300] # ROI 저장
+        cv2.rectangle(frame, (50, 50), (400, 400), (255, 255, 2), 4)  # outer most rectangle
+        ROI = frame[50:400, 50:400] # ROI 저장
+
+        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2YCrCb)
+        # COLOR_MIN = np.array([61, 132, 109], np.uint8)
+        # COLOR_MAX = np.array([166, 166, 166], np.uint8)
+        COLOR_MIN = np.array([0, 137, 77], np.uint8)
+        COLOR_MAX = np.array([255, 173, 127], np.uint8)
+
+        frame_threshed = cv2.inRange(hsv, COLOR_MIN, COLOR_MAX)
+        ret, threshold_image = cv2.threshold(frame_threshed, 100, 255, cv2.THRESH_BINARY)
 
         # MOG2 Background Subtraction
-        fgmask = ROI
-        fgbg.setBackgroundRatio(0.005)
-        fgmask = fgbg.apply(ROI, fgmask)
+        #fgmask = ROI
+        #fgbg.setBackgroundRatio(0.005)
+        #fgmask = fgbg.apply(ROI, fgmask)
 
         # Noise remove
         kernel = np.ones((5, 5), np.uint8)
-        c1 = cv2.morphologyEx(fgmask, cv2.MORPH_CLOSE, kernel) # 잡음 제거 기술로 열림필터와 닫힘필터로 제거한다. 아래 주소에서 참고
+        c1 = cv2.morphologyEx(threshold_image, cv2.MORPH_OPEN, kernel) # 잡음 제거 기술로 열림필터와 닫힘필터로 제거한다. 아래 주소에서 참고
         c2 = cv2.morphologyEx(c1, cv2.MORPH_CLOSE, kernel)
         closing = cv2.morphologyEx(c2, cv2.MORPH_CLOSE, kernel) # http://hongkwan.blogspot.kr/2013/01/opencv-5-2-example.html - 참고
 
@@ -174,7 +182,7 @@ def main():
         #cv2.imshow('blur', blur)
         #cv2.imshow('hsv', hsv)
         #cv2.imshow('thresh', thresh)
-        cv2.imshow('mog2', fgmask)
+        #cv2.imshow('mog2', fgmask)
         cv2.imshow('ROI', ROI)
 
         #record.write(frame)
