@@ -4,16 +4,18 @@ import math
 
 # Define put text font
 font = cv2.FONT_HERSHEY_SIMPLEX
+trackWindow = None
+startTrack = False
 # Define the codec and create VideoWriter object
 #fourcc = cv2.VideoWriter_fourcc(*'XVID')                                                       # - 동영상 저장 - 1
 #record = cv2.VideoWriter('output/' + str(datetime.now()) + '.avi', fourcc, 20.0, (640, 480))  # - 동영상 저장 - 2
 
 def main():
     # Capture from webcam
-    cam = cv2.VideoCapture('TestingMovie.mp4') # 카메라에서 읽어오기
+    cam = cv2.VideoCapture(0) # 카메라에서 읽어오기
     fgbg = cv2.createBackgroundSubtractorMOG2() # 영상 속 배경 추출, http://eehoeskrap.tistory.com/117 - 참고 주소
 
-    while True:
+    while not startTrack:
         ret, frame = cam.read()
 
         # print(frame.shape)
@@ -94,6 +96,8 @@ def main():
             rect = cv2.minAreaRect(cnt)
             box = cv2.boxPoints(rect)
             box = np.int0(box)
+            trackWindow = box
+            startTrack = not startTrack
             cv2.drawContours(ROI, [box], 0, (0, 0, 255), 2)
 
             # approximate the shape
@@ -107,7 +111,8 @@ def main():
             fingers = 0 # 손가락 갯수를 담는 변수
 
             # Get defect points and draw them in the original image
-            if defects is not None:
+            # 아래 줄들은 임시로 주석
+            '''if defects is not None:
                 # print('defects shape = ', defects.shape[0])
                 for i in range(defects.shape[0]):
                     s, e, f, d = defects[i, 0]
@@ -177,10 +182,10 @@ def main():
 
         else:
             # prints msg: no hand detected
-            cv2.putText(frame, "No hand detected", (45, 450), font, 2, np.random.randint(0, 255, 3).tolist(), 2)
+            cv2.putText(frame, "No hand detected", (45, 450), font, 2, np.random.randint(0, 255, 3).tolist(), 2)'''
 
         # Show outputs images
-        cv2.imshow('frame', frame)
+        #cv2.imshow('frame', frame)
         #cv2.imshow('blur', blur)
         #cv2.imshow('hsv', hsv)
         #cv2.imshow('thresh', thresh)
@@ -192,6 +197,9 @@ def main():
         # Check key pressed
         if cv2.waitKey(100) == 27:
             break  # ESC to quit
+
+    cv2.imshow('frame', trackWindow)
+    cv2.waitKey(0)
 
     cv2.destroyAllWindows()
 
