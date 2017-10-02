@@ -96,8 +96,12 @@ def main():
             rect = cv2.minAreaRect(cnt)
             box = cv2.boxPoints(rect)
             box = np.int0(box)
-            trackWindow = box
-            startTrack = not startTrack
+
+            width=box[0]-box[1]#임시 코드 인덱스는 확인 후 다시작성
+            height=box[2]-box[2]#마찬가지
+            if width * height > 48:
+                trackWindow = box
+                startTrack = not startTrack
             cv2.drawContours(ROI, [box], 0, (0, 0, 255), 2)
 
             # approximate the shape
@@ -198,11 +202,13 @@ def main():
         if cv2.waitKey(100) == 27:
             break  # ESC to quit
 
-    cv2.imshow('frame', trackWindow)
-    cv2.waitKey(0)
+    while True:
+        cv2.imshow('frame', trackWindow)
+
+        if cv2.waitKey(100) == 27:
+            break  # ESC to quit
 
     cv2.destroyAllWindows()
-
 
 if __name__ == '__main__':
     main()
