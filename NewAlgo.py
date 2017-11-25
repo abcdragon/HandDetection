@@ -4,48 +4,63 @@ import math
 
 startTrack = False
 
-cam = cv2.VideoCapture('TestingMovie2.mp4')
-fgbg = cv2.createBackgroundSubtractorMOG2() # 제거할 배경 생성
+cam = cv2.VideoCapture( 0 )
+# cv2.waitKey(0)
 
-#cv2.waitKey(0)
-
-while(cam.isOpened()):
+while (cam.isOpened()):
     ret, frame = cam.read()
 
-    fgmask = fgbg.apply(frame) # 배경제거
+    HSV = cv2.cvtColor( frame, cv2.COLOR_BGR2HSV )
+    skinColorMin = np.array( [0, 48, 80] )
+    skinColorMax = np.array( [20, 255, 255] )
 
-    YCrCb = cv2.cvtColor(fgmask, cv2.COLOR_BGR2YCrCb)
-    skinColorMin = np.array([0, 133, 77])
-    skinColorMax = np.array([255, 173, 127])
-
-    Range = cv2.inRange(YCrCb, skinColorMin, skinColorMax)
-    cv2.imshow('Pick', Range)
-
-    _, thresholdImage = cv2.threshold(Range, 127, 255, cv2.THRESH_BINARY)
-    #_, threshold_image = cv2.adaptiveThreshold(Range, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 15, 2)
-    cv2.imshow('threshold', thresholdImage)
+    Range = cv2.inRange( HSV, skinColorMin, skinColorMax )
+    _, thresholdImage = cv2.threshold( Range, 200, 255, cv2.THRESH_BINARY )
+    # _, threshold_image = cv2.adaptiveThreshold(Range, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 15, 2)
+    cv2.imshow( 'threshold', thresholdImage )
 
     kernel = np.ones( (5, 5), np.uint8 )
-    c1 = cv2.morphologyEx( thresholdImage, cv2.MORPH_CLOSE, kernel)
-    c2 = cv2.morphologyEx( c1, cv2.MORPH_OPEN, kernel)
-    thresholdImage = c2
+    c1 = cv2.morphologyEx( thresholdImage, cv2.MORPH_CLOSE, kernel )
+    c2 = cv2.morphologyEx( c1, cv2.MORPH_OPEN, kernel )
+    thresholdImage = cv2.morphologyEx( c2, cv2.MORPH_OPEN, kernel )
 
-    _, contours, hierarchy = cv2.findContours( thresholdImage, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE ) # 3번째 인자 대체 : RETR_TREE
+    _, contours, hierarchy = cv2.findContours( thresholdImage, cv2.RETR_EXTERNAL,
+                                               cv2.CHAIN_APPROX_SIMPLE )  # 3번째 인자 대체 : RETR_TREE
 
-    max = cv2.contourArea(contours[0])
-    max_idx = 0
+    if contours:
+        max = cv2.contourArea( contours[0] )
+        maxIdx = 0
 
-    for idx, cnt in enumerate(contours[1:]):
-        tmp = cv2.contourArea(cnt)
+        for i in range( len( contours ) ):
+            if cv2.contourArea( contours[i] ) > max:
+                maxIdx = i
+                max = cv2.contourArea( contours[i] )
 
-        if tmp > max :
-            max = tmp
-            max_idx = idx
+        cnt = contours[maxIdx]
 
-    cnt = contours[max_idx]
-    cv2.drawContours(frame, [cnt], -1, [255, 0, 0], 3)
+        moments = cv2.moments( cnt )
 
-    if cv2.waitKey(30) & 0xFF == ord('q'):
+        cx = 0
+        cy = 0
+
+        if moments['m00'] != 0:
+            cx = int( moments['m10'] / moments['m00'] )
+            cx = int( moments['m01'] / moments['m00'] )
+
+        center = (cx, cy)
+
+        # find the circle which completely covers the object with minimum area
+        (x, y), radius = cv2.minEnclosingCircle( cnt )  # rasdius와 (x, y) 에 해당 범위를 감싸는 원을 그린다.
+        center = (int( x ), int( y ))
+        radius = int( radius )
+        cv2.circle( frame, center, radius, (255, 255, 255), 3 )
+        cv2.circle( frame, center, 10, [0, 0, 255], -1 )
+
+        # cv2.drawContours(frame, [cnt], -1, [255, 0, 0], 3)
+
+    cv2.imshow( 'frame', frame )
+
+    if cv2.waitKey( 30 ) & 0xFF == ord( 'q' ):
         break
 
 cv2.destroyAllWindows()
