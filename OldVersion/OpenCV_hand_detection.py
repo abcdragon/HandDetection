@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
-import math
-import GetMiddlePoint
+
+from OldVersion import GetMiddlePoint
 
 img = cv2.imread("TestImageVertical.jpg", cv2.IMREAD_COLOR)
 
@@ -50,7 +50,7 @@ def YCbCr_Skin_Rectangle():
 
         cv2.drawContours(img, [hull], 0, (0, 255, 0), 3)
 
-    middlePoint = GetMiddlePoint.FindMiddlePoint(tempPoint)
+    middlePoint = GetMiddlePoint.FindMiddlePoint( tempPoint )
     #print(middlePoint)
 
     minX, maxX = middlePoint[0][0], middlePoint[0][0]
