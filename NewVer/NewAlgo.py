@@ -79,6 +79,7 @@ try:
                 # find the circle which completely covers the object with minimum area
                 col, row, x, y = cv2.boundingRect(cnt) # re : rect
                 height, width = abs(row - y), abs(col - x)
+                if height * width < 100 : break
                 #trackWindow = (col, row, width, height)
                 roi = frame[row:row+height, col:col+width]
                 roi = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
