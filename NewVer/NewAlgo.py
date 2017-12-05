@@ -21,6 +21,7 @@ try:
     # 검사
     while True:
         if not start :
+            centerArray = list()
             _, preStart = cam.read()
             cv2.imshow('Test', preStart)
 
@@ -33,7 +34,7 @@ try:
                 cv2.destroyAllWindows()
                 break
 
-        while start:
+        while start and (trackWindow is None):
             ret, frame = cam.read()  # (848, 480), (width, height)
 
             HSV = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
@@ -43,7 +44,6 @@ try:
             Range = cv2.inRange(HSV, skinColorMin, skinColorMax)
             _, thresholdImage = cv2.threshold(Range, 200, 255, cv2.THRESH_BINARY)
             # _, threshold_image = cv2.adaptiveThreshold(Range, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 15, 2)
-            cv2.imshow('threshold', thresholdImage)
 
             kernel = np.ones((5, 5), np.uint8)
             c1 = cv2.morphologyEx(thresholdImage, cv2.MORPH_CLOSE, kernel)
@@ -71,29 +71,29 @@ try:
                     cx = int(moments['m10'] / moments['m00'])
                     cx = int(moments['m01'] / moments['m00'])
 
+                (x, y), radius = cv2.minEnclosingCircle(cnt)  # rasdius와 (x, y) 에 해당 범위를 감싸는 원을 그린다.
+
                 center = (cx, cy)
+                #center = (int(x), int(y)) # 비교 해보기
 
                 # find the circle which completely covers the object with minimum area
-                (x, y), radius = cv2.minEnclosingCircle(cnt)  # rasdius와 (x, y) 에 해당 범위를 감싸는 원을 그린다.
-                rect = cv2.minAreaRect(cnt)
-                box = cv2.boxPoints(rect)
-                box = np.int0(box)
-
-                print(box)
-                center = (int(x), int(y))
-                cv2.drawContours(frame, [box], 0, (0, 0, 255), 2)
-
+                col, row, x, y = cv2.boundingRect(cnt) # re : rect
+                height, width = abs(row - y), abs(col - x)
+                #trackWindow = (col, row, width, height)
+                roi = frame[row:row+height, col:col+width]
+                roi = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
+                roi_hist = cv2.calcHist([roi], [0], None, [180], [0, 180])
+                cv2.normalize(roi_hist, roi_hist, 0, 255, cv2.NORM_MINMAX)
+                cv2.imshow("this is roi", roi)
+                #center = (int(x), int(y))
                 centerArray.append(center)
 
                 radius = int(radius)
                 cv2.circle(frame, center, radius, (255, 255, 255), 3)
 
-                #trackWindow = box
-
                 if trackWindow is not None:
                     termination = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 1)
-                    frame_hist = cv2.cvtColor([HSV], [0], None, [180], [0, 180])
-                    dst = cv2.calcBackProject([HSV], [0], frame_hist, [0, 180], 1)
+                    dst = cv2.calcBackProject([HSV], [0], roi_hist, [0, 180], 1)
                     getData, trackWindow = cv2.CamShift(dst, trackWindow, termination)
 
                     pts = cv2.boxPoints(getData)
@@ -101,12 +101,11 @@ try:
                     cv2.polylines(frame, [pts], True, (0, 255, 0), 2)
                 # cv2.drawContours(frame, [cnt], -1, [255, 0, 0], 3)
 
-                #cv2.imshow('frame', frame)
 
                 for center in centerArray:
                     cv2.circle(frame, center, 2, (255, 0, 0), -1)
 
-                cv2.imshow('dot', frame)
+                cv2.imshow('frame', frame)
             key = cv2.waitKey(30) & 0xFF
 
             if key == ord('q'):
