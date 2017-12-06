@@ -100,6 +100,7 @@ try:
                     quit()
                 else:
                     cv2.imwrite( 'Result.jpg', frame )
+
                     print( '암호가 새로 저장되었습니다. 다시 암호를 풀어주세요' )
                     start = False  # 이 while 문 종료하고, 다시 C를 누를 때까지 체크
                     # 검사
