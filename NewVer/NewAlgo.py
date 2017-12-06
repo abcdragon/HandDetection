@@ -14,6 +14,8 @@ cam = cv2.VideoCapture(0)
 FileChk = os.path.exists('Result.jpg')
 centerArray = list()
 trackWindow = None
+HSV = None
+roi_hist = None
 
 start = False
 
@@ -33,6 +35,15 @@ try:
             if key == ord('s'):
                 cv2.destroyAllWindows()
                 break
+
+        while start and (trackWindow is not None):
+            termination = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 1)
+            dst = cv2.calcBackProject([HSV], [0], roi_hist, [0, 180], 1)
+            getData, trackWindow = cv2.CamShift(dst, trackWindow, termination)
+
+            pts = cv2.boxPoints(getData)
+            pts = np.int0(pts)
+            cv2.polylines(frame, [pts], True, (0, 255, 0), 2)
 
         while start and (trackWindow is None):
             ret, frame = cam.read()  # (848, 480), (width, height)
@@ -80,7 +91,7 @@ try:
                 col, row, x, y = cv2.boundingRect(cnt) # re : rect
                 height, width = abs(row - y), abs(col - x)
                 if height * width < 100 : break
-                #trackWindow = (col, row, width, height)
+                trackWindow = (col, row, width, height)
                 roi = frame[row:row+height, col:col+width]
                 roi = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
                 roi_hist = cv2.calcHist([roi], [0], None, [180], [0, 180])
@@ -91,17 +102,7 @@ try:
 
                 radius = int(radius)
                 cv2.circle(frame, center, radius, (255, 255, 255), 3)
-
-                if trackWindow is not None:
-                    termination = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 1)
-                    dst = cv2.calcBackProject([HSV], [0], roi_hist, [0, 180], 1)
-                    getData, trackWindow = cv2.CamShift(dst, trackWindow, termination)
-
-                    pts = cv2.boxPoints(getData)
-                    pts = np.int0(pts)
-                    cv2.polylines(frame, [pts], True, (0, 255, 0), 2)
                 # cv2.drawContours(frame, [cnt], -1, [255, 0, 0], 3)
-
 
                 for center in centerArray:
                     cv2.circle(frame, center, 2, (255, 0, 0), -1)
