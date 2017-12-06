@@ -13,8 +13,9 @@ centerArray = list()
 trackWindow = None
 HSV = None
 roi_hist = None
-
 start = False
+
+
 try:
     # 검사
     while True:
