@@ -15,7 +15,6 @@ HSV = None
 roi_hist = None
 start = False
 
-
 try:
     # 검사
     while True:
@@ -67,13 +66,17 @@ try:
                 # find the circle which completely covers the object with minimum area
                 col, row, x, y = cv2.boundingRect( cnt )  # re : rect
                 height, width = abs( row - y ), abs( col - x )
-                if height * width < 100: break
+                if height * width < 100: break # 화면 크기 체크로 너무 작으면 break
+                
                 trackWindow = (col, row, width, height)
                 roi = frame[row:row + height, col:col + width]
-                roi = cv2.cvtColor( roi, cv2.COLOR_BGR2HSV )
-                roi_hist = cv2.calcHist( [roi], [0], None, [180], [0, 180] )
+                hsv_roi = cv2.cvtColor( roi, cv2.COLOR_BGR2HSV )
+                mask = cv2.inRange(hsv_roi, skinColorMin, skinColorMax)
+                roi_hist = cv2.calcHist( [hsv_roi], [0], mask, [180], [0, 180] )
+                
                 cv2.normalize( roi_hist, roi_hist, 0, 255, cv2.NORM_MINMAX )
                 cv2.imshow( "this is roi", roi )
+                
                 # center = (int(x), int(y))
                 centerArray.append( center )
 
@@ -86,6 +89,8 @@ try:
 
                 cv2.imshow( 'frame', frame )
 
+            if trackWindow is not None : break
+                
             key = cv2.waitKey( 30 ) & 0xFF
 
             if key == ord( 'q' ):
@@ -105,19 +110,21 @@ try:
                     print( '암호가 새로 저장되었습니다. 다시 암호를 풀어주세요' )
                     start = False  # 이 while 문 종료하고, 다시 C를 누를 때까지 체크
                     # 검사
-
+                
                     # Q를 누를 때까지 암호 만들기
-        while start and (trackWindow is not None):
-            _, frame = cam.read()
+    while trackWindow is not None:
+        _, frame = cam.read()
 
-            print( "dtdtdtd" )
-            termination = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 1)
-            dst = cv2.calcBackProject( [HSV], [0], roi_hist, [0, 180], 1 )
-            getData, trackWindow = cv2.CamShift( dst, trackWindow, termination )
+        HSV = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        dst = cv2.calcBackProject( [HSV], [0], roi_hist, [0, 180], 1 )
 
-            pts = cv2.boxPoints( getData )
-            pts = np.int0( pts )
-            cv2.polylines( frame, [pts], True, (0, 255, 0), 2 )
+        termination = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 1)
+        getData, trackWindow = cv2.CamShift( dst, trackWindow, termination )
+
+        pts = cv2.boxPoints( getData )
+        pts = np.int0( pts )
+        Show_frame = cv2.polylines( frame, [pts], True, (0, 255, 0), 2 )
+        cv2.imshow('Showing', Show_frame)
 except:
     pass
 
